@@ -2,14 +2,10 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>東海違規監控地圖</title>
+  <title>測試地圖</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     #map { height: 100vh; }
-    .popup-img {
-      width: 200px;
-      margin-top: 8px;
-    }
   </style>
 </head>
 <body>
@@ -18,41 +14,12 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([24.1792, 120.6009], 17);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
     }).addTo(map);
-
-    const cameras = [
-      { name: 'yuenonglixin1', lat: 24.1800, lng: 120.6015 },
-      { name: 'bikegate', lat: 24.1775, lng: 120.5990 }
-    ];
-
-    cameras.forEach(cam => {
-      const marker = L.marker([cam.lat, cam.lng]).addTo(map)
-        .bindPopup(`<b>${cam.name}</b><br>載入中...`)
-        .on('click', async () => {
-          try {
-            const res = await fetch(`https://violationmap.onrender.com/violations/${cam.name}`);
-            const data = await res.json();
-
-            if (data.length === 0) {
-              marker.setPopupContent(`<b>${cam.name}</b><br>沒有違規紀錄`);
-            } else {
-              const latest = data[data.length - 1];
-              marker.setPopupContent(`
-                <b>${cam.name}</b><br>
-                最後違規時間：${latest.timestamp}<br>
-                車種：${latest.labels.join(', ')}<br>
-                <img src="${latest.image_url}" class="popup-img" />
-              `);
-            }
-          } catch (err) {
-            marker.setPopupContent(`<b>${cam.name}</b><br>讀取錯誤`);
-            console.error(err);
-          }
-        });
-    });
+    L.marker([24.1792, 120.6009]).addTo(map)
+      .bindPopup('Hello 東海大學')
+      .openPopup();
   </script>
 </body>
 </html>
