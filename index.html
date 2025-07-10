@@ -5,64 +5,118 @@
   <title>東海違規監控地圖</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    #map { height: 100vh; }
-    .popup-img {
-      width: 200px;
+    body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+    #sidebar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 320px;
+      height: 100%;
+      background: white;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+      overflow-y: auto;
+      display: none;
+      padding: 16px;
+      z-index: 1000;
+    }
+    #sidebar h2 { margin-top: 0; }
+    .violation-item { margin-bottom: 16px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+    .violation-item img { width: 100%; margin-top: 8px; }
+    .view-all-btn {
+      display: inline-block;
       margin-top: 8px;
+      padding: 4px 8px;
+      background: #4287f5;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
+  <div id="sidebar"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // ==== 1. 初始化地圖 ====
-    const map = L.map('map').setView([24.1792, 120.6009], 17); // 東海大學中心點
+    // 初始化地圖
+    const map = L.map('map').setView([24.1792, 120.6009], 17);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
-    // ==== 2. 加入 OSM 底圖 ====
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-    }).addTo(map);
+    // 偵測點擊地圖空白處以關閉側欄
+    map.on('click', () => {
+      document.getElementById('sidebar').style.display = 'none';
+    });
 
-    // ==== 3. 定義你的監視器位置（名稱要吻合後端 camera_name） ====
+    // 設定攝影機位置（需與後端 camera_name 一致）
     const cameras = [
-      { name: 'test_road', lat: 24.1795, lng: 120.6010 },
-      // 你如果有更多路段，再加在這裡，例如：
-      // { name: 'yuenonglixin1', lat: 24.1800, lng: 120.6015 },
-      // { name: 'bikegate',       lat: 24.1775, lng: 120.5990 }
+      { name: 'test_road', lat: 24.1795, lng: 120.6010 }
     ];
 
-    // ==== 4. 把標記加到地圖上，並在點擊時向後端拉資料 ====
     cameras.forEach(cam => {
-      const marker = L.marker([cam.lat, cam.lng]).addTo(map)
-        .bindPopup(`<b>${cam.name}</b><br>載入中...`)
-        .on('click', async () => {
-          try {
-            const res = await fetch(
-              `https://oloobijiang-krsh.onrender.com/violations/${cam.name}`
-            );
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
+      const marker = L.marker([cam.lat, cam.lng]).addTo(map);
+      marker.bindPopup(`<b>${cam.name}</b><br>載入中...`);
 
-            if (!Array.isArray(data) || data.length === 0) {
-              marker.setPopupContent(`<b>${cam.name}</b><br>沒有違規紀錄`);
-            } else {
-              // 取得最後一筆
-              const latest = data[data.length - 1];
-              marker.setPopupContent(`
-                <b>${cam.name}</b><br>
-                最後違規時間：${latest.time}<br>
-                車種：${latest.vehicle}<br>
-                <img src="${latest.image_url}" class="popup-img" />
-              `);
-            }
-          } catch (err) {
-            console.error(err);
-            marker.setPopupContent(`<b>${cam.name}</b><br>資料載入失敗`);
+      marker.on('click', async () => {
+        const popup = marker.getPopup();
+        popup.setContent(`<b>${cam.name}</b><br>載入中...`);
+        popup.openOn(map);
+
+        try {
+          const res = await fetch(
+            `https://oloobijiang-krsh.onrender.com/violations/${cam.name}`
+          );
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          let content;
+
+          if (!Array.isArray(data) || data.length === 0) {
+            content = `<b>${cam.name}</b><br>沒有違規紀錄`;
+          } else {
+            const latest = data[data.length - 1];
+            content = `
+              <b>${cam.name}</b><br>
+              最後違規時間：${latest.time}<br>
+              車種：${latest.vehicle}<br>`;
+            content += `<div class="view-all-btn" onclick="showSidebar('${cam.name}')">查看全部</div>`;
           }
-        });
+          popup.setContent(content);
+        } catch (err) {
+          popup.setContent(`<b>${cam.name}</b><br>資料載入失敗`);
+        }
+      });
     });
+
+    // 顯示側欄並載入完整資料
+    window.showSidebar = async function(cameraName) {
+      try {
+        const res = await fetch(
+          `https://oloobijiang-krsh.onrender.com/violations/${cameraName}`
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const sb = document.getElementById('sidebar');
+        sb.innerHTML = `<h2>${cameraName} - 完整違規紀錄</h2>`;
+
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'violation-item';
+          div.innerHTML = `
+            <b>時間：</b>${item.time}<br>
+            <b>車種：</b>${item.vehicle}<br>
+            <b>攝影機：</b>${item.camera_name}<br>
+            <img src="${item.image_url}" />
+          `;
+          sb.appendChild(div);
+        });
+        sb.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        alert('無法載入完整資料');
+      }
+    };
   </script>
 </body>
 </html>
