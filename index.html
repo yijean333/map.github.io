@@ -17,39 +17,49 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([24.1792, 120.6009], 17);
+    // ==== 1. 初始化地圖 ====
+    const map = L.map('map').setView([24.1792, 120.6009], 17); // 東海大學中心點
 
+    // ==== 2. 加入 OSM 底圖 ====
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
     }).addTo(map);
 
+    // ==== 3. 定義你的監視器位置（名稱要吻合後端 camera_name） ====
     const cameras = [
-      { name: 'yuenonglixin1', lat: 24.1800, lng: 120.6015 },
-      { name: 'bikegate', lat: 24.1775, lng: 120.5990 }
+      { name: 'test_road', lat: 24.1795, lng: 120.6010 },
+      // 你如果有更多路段，再加在這裡，例如：
+      // { name: 'yuenonglixin1', lat: 24.1800, lng: 120.6015 },
+      // { name: 'bikegate',       lat: 24.1775, lng: 120.5990 }
     ];
 
+    // ==== 4. 把標記加到地圖上，並在點擊時向後端拉資料 ====
     cameras.forEach(cam => {
       const marker = L.marker([cam.lat, cam.lng]).addTo(map)
         .bindPopup(`<b>${cam.name}</b><br>載入中...`)
         .on('click', async () => {
           try {
-            const res = await fetch(`https://your-api-name.onrender.com/violations/${cam.name}`);
+            const res = await fetch(
+              `https://oloobijiang-krsh.onrender.com/violations/${cam.name}`
+            );
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
 
-            if (data.length === 0) {
+            if (!Array.isArray(data) || data.length === 0) {
               marker.setPopupContent(`<b>${cam.name}</b><br>沒有違規紀錄`);
             } else {
+              // 取得最後一筆
               const latest = data[data.length - 1];
               marker.setPopupContent(`
                 <b>${cam.name}</b><br>
-                最後違規時間：${latest.timestamp}<br>
-                車種：${latest.labels.join(', ')}<br>
+                最後違規時間：${latest.time}<br>
+                車種：${latest.vehicle}<br>
                 <img src="${latest.image_url}" class="popup-img" />
               `);
             }
           } catch (err) {
-            marker.setPopupContent(`<b>${cam.name}</b><br>讀取錯誤`);
             console.error(err);
+            marker.setPopupContent(`<b>${cam.name}</b><br>資料載入失敗`);
           }
         });
     });
