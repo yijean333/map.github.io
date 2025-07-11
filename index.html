@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>東海違規監控地圖</title>
+  <title>校園交通違規路段監控地圖</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -60,7 +60,7 @@
 </head>
 <body>
   <div id="map"></div>
-  <button id="reset-btn" title="回到地圖中心">
+  <button id="reset-btn" title="回到地圖初始位置">
     <i class="fa-solid fa-crosshairs"></i>
   </button>
   <div id="sidebar"></div>
@@ -138,7 +138,7 @@
           div.innerHTML = `
             <b>時間：</b>${item.time}<br>
             <b>車種：</b>${item.vehicle}<br>
-            <b>攝影機：</b>${item.camera_name}<br>
+            <b>路段：</b>${item.camera_name}<br>
             <img src="${item.image_url}" />
           `;
           sb.appendChild(div);
