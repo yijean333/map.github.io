@@ -33,10 +33,29 @@
       border-radius: 4px;
       cursor: pointer;
     }
+
+    #reset-btn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+      padding: 10px 14px;
+      background: #4287f5;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    #reset-btn:hover {
+      background: #2f6fe0;
+    }
+
   </style>
 </head>
 <body>
   <div id="map"></div>
+  <button id="reset-btn">回到初始位置</button>
   <div id="sidebar"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -50,6 +69,11 @@
       document.getElementById('sidebar').style.display = 'none';
     });
 
+    // 回到初始位置
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      map.setView([24.1792, 120.6009], 17);
+    });
+    
     // 設定攝影機位置（需與後端 camera_name 一致）
     const cameras = [
       { name: 'test_road', lat: 24.1795, lng: 120.6010 },
