@@ -98,7 +98,7 @@
 
         try {
           const res = await fetch(
-            `https://oloobijiang-krsh.onrender.com/violations/${cam.name}`
+            `https://oloobijiang-krsh.onrender.com/violations/${cam.name}?today=1`
           );
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
@@ -125,7 +125,7 @@
     window.showSidebar = async function(cameraName) {
       try {
         const res = await fetch(
-          `https://oloobijiang-krsh.onrender.com/violations/${cameraName}`
+          `https://oloobijiang-krsh.onrender.com/violations/${cameraName}?today=1`
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
