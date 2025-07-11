@@ -105,7 +105,7 @@
           let content;
 
           if (!Array.isArray(data) || data.length === 0) {
-            content = `<b>${cam.name}</b><br>沒有違規紀錄`;
+            content = `<b>${cam.name}</b><br>最近沒有違規紀錄`;
           } else {
             const latest = data[data.length - 1];
             content = `
@@ -130,7 +130,7 @@
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const sb = document.getElementById('sidebar');
-        sb.innerHTML = `<h2>${cameraName} - 完整違規紀錄</h2>`;
+        sb.innerHTML = `<h2>${cameraName} 違規紀錄</h2>`;
 
         data.slice().reverse().forEach(item => {
           const div = document.createElement('div');
@@ -138,7 +138,6 @@
           div.innerHTML = `
             <b>時間：</b>${item.time}<br>
             <b>車種：</b>${item.vehicle}<br>
-            <b>路段：</b>${item.camera_name}<br>
             <img src="${item.image_url}" />
           `;
           sb.appendChild(div);
