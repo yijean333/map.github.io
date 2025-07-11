@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>東海違規監控地圖</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
     #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
@@ -39,13 +40,17 @@
       bottom: 20px;
       right: 20px;
       z-index: 1001;
-      padding: 10px 14px;
+      padding: 10px;
       background: #4287f5;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 50%;
       cursor: pointer;
       box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     #reset-btn:hover {
       background: #2f6fe0;
@@ -55,7 +60,9 @@
 </head>
 <body>
   <div id="map"></div>
-  <button id="reset-btn">回到初始位置</button>
+  <button id="reset-btn" title="回到地圖中心">
+    <i class="fa-solid fa-crosshairs"></i>
+  </button>
   <div id="sidebar"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
