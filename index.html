@@ -88,10 +88,19 @@
     }
     loadViolationData();
     setInterval(loadViolationData, 60 * 1000);
-
+    
+    // 自訂「三隻牛」圖示
+    const cowIcon = L.icon({
+      iconUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXrdKbylXu1YbMq5mxRtdm2P8bzdEYNu76ng&s',
+      iconSize: [35, 35],       // 根據圖檔比例調整大小
+      iconAnchor: [17, 34],     // 圖標底部中心
+      popupAnchor: [0, -30],    // popup 位置
+    });
+    
     // 5. 為每個攝影機新增 marker 與點擊事件
     cameras.forEach(cam => {
-      const marker = L.marker([cam.lat, cam.lng]).addTo(map);
+      //const marker = L.marker([cam.lat, cam.lng]).addTo(map);
+      const marker = L.marker([cam.lat, cam.lng], {icon: cam.name === '測試用勿按' ? cowIcon : undefined}).addTo(map);// 記得刪!!!!!
       marker.bindPopup(`<b>${cam.name}</b><br>載入中...`);
 
       marker.on('click', () => {
