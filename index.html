@@ -88,7 +88,7 @@
 
     // 讀取並更新 JSON
     function loadViolationData() {
-      fetch("https://yijean333.github.io/flask_backend/violation.json")
+      fetch("https://yijean333.github.io/flask_backend/violations.json")
         .then(res => res.json())
         .then(data => {
           violations = data;
