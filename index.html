@@ -34,7 +34,6 @@
       border-radius: 4px;
       cursor: pointer;
     }
-
     #reset-btn {
       position: absolute;
       bottom: 20px;
@@ -52,10 +51,7 @@
       align-items: center;
       justify-content: center;
     }
-    #reset-btn:hover {
-      background: #2f6fe0;
-    }
-
+    #reset-btn:hover { background: #2f6fe0; }
   </style>
 </head>
 <body>
@@ -67,74 +63,97 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // 初始化地圖
+    // 地圖初始化
     const map = L.map('map').setView([24.1792, 120.6009], 17);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
-    // 偵測點擊地圖空白處以關閉側欄
     map.on('click', () => {
       document.getElementById('sidebar').style.display = 'none';
     });
-
-    // 回到初始位置
     document.getElementById('reset-btn').addEventListener('click', () => {
       map.setView([24.1792, 120.6009], 17);
     });
-    
-    // 設定攝影機位置（需與後端 camera_name 一致）
+
+    // 攝影機座標
     const cameras = [
       { name: 'test_road', lat: 24.1795, lng: 120.6010 },
       { name: 'yuenonglixin1', lat: 24.1800, lng: 120.6015 },
       { name: '測試用勿按', lat: 24.1797, lng: 120.6042 },
-      { name: '約農力行路口', lat: 24.1793, lng: 120.6030}
+      { name: '約農力行路口', lat: 24.1793, lng: 120.6030 }
     ];
 
+    // 全域變數：存放最新 violations
+    let violations = [];
+    let lastTimestamp = "";
+
+    // 讀取並更新 JSON
+    function loadViolationData() {
+      fetch("https://yijean333.github.io/flask_backend/violation.json")
+        .then(res => res.json())
+        .then(data => {
+          violations = data;
+          // 篩出今天的資料
+          const today = new Date().toISOString().split("T")[0];
+          const todayData = violations.filter(item => item.time.startsWith(today));
+          // 找最新一筆 time
+          const newest = todayData.reduce((max, i) => i.time > max ? i.time : max, "");
+          if (newest && newest !== lastTimestamp) {
+            lastTimestamp = newest;
+            console.log("資料更新到：" + lastTimestamp);
+          }
+        })
+        .catch(err => console.error("載入 JSON 發生錯誤:", err));
+    }
+
+    // 一開始載入並每分鐘更新一次
+    loadViolationData();
+    setInterval(loadViolationData, 60 * 1000);
+
+    // 為每個攝影機加上標記與點擊行為
     cameras.forEach(cam => {
       const marker = L.marker([cam.lat, cam.lng]).addTo(map);
       marker.bindPopup(`<b>${cam.name}</b><br>載入中...`);
 
-      marker.on('click', async () => {
+      marker.on('click', () => {
         const popup = marker.getPopup();
         popup.setContent(`<b>${cam.name}</b><br>載入中...`);
         popup.openOn(map);
 
-        try {
-          const res = await fetch(
-            `https://oloobijiang-krsh.onrender.com/violations/${cam.name}?today=1`
-          );
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
-          let content;
+        // 篩出該鏡頭且為今天的違規
+        const today = new Date().toISOString().split("T")[0];
+        const data = violations
+          .filter(item => item.camera_name === cam.name && item.time.startsWith(today));
 
-          if (!Array.isArray(data) || data.length === 0) {
-            content = `<b>${cam.name}</b><br>最近沒有違規紀錄`;
-          } else {
-            const latest = data[data.length - 1];
-            content = `
-              <b>${cam.name}</b><br>
-              最後違規時間：${latest.time}<br>
-              車種：${latest.vehicle}<br>`;
-            content += `<div class="view-all-btn" onclick="showSidebar('${cam.name}')">查看全部</div>`;
-          }
-          popup.setContent(content);
-        } catch (err) {
-          popup.setContent(`<b>${cam.name}</b><br>資料載入失敗`);
+        let content;
+        if (data.length === 0) {
+          content = `<b>${cam.name}</b><br>最近沒有違規紀錄`;
+        } else {
+          const latest = data[data.length - 1];
+          content = `
+            <b>${cam.name}</b><br>
+            最後違規時間：${latest.time}<br>
+            車種：${latest.vehicle}<br>
+            <div class="view-all-btn" onclick="showSidebar('${cam.name}')">查看全部</div>
+          `;
         }
+        popup.setContent(content);
       });
     });
 
     // 顯示側欄並載入完整資料
-    window.showSidebar = async function(cameraName) {
-      try {
-        const res = await fetch(
-          `https://oloobijiang-krsh.onrender.com/violations/${cameraName}?today=1`
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        const sb = document.getElementById('sidebar');
-        sb.innerHTML = `<h2>${cameraName} 違規紀錄</h2>`;
+    window.showSidebar = function(cameraName) {
+      const sb = document.getElementById('sidebar');
+      sb.innerHTML = `<h2>${cameraName} 違規紀錄</h2>`;
 
-        data.slice().reverse().forEach(item => {
+      const today = new Date().toISOString().split("T")[0];
+      const data = violations
+        .filter(item => item.camera_name === cameraName && item.time.startsWith(today))
+        .sort((a, b) => b.time.localeCompare(a.time));
+
+      if (data.length === 0) {
+        sb.innerHTML += `<p>今天沒有任何記錄。</p>`;
+      } else {
+        data.forEach(item => {
           const div = document.createElement('div');
           div.className = 'violation-item';
           div.innerHTML = `
@@ -144,11 +163,8 @@
           `;
           sb.appendChild(div);
         });
-        sb.style.display = 'block';
-      } catch (err) {
-        console.error(err);
-        alert('無法載入完整資料');
       }
+      sb.style.display = 'block';
     };
   </script>
 </body>
