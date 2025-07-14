@@ -10,46 +10,23 @@
     #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
     #sidebar {
       position: absolute;
-      top: 0;
-      right: 0;
-      width: 320px;
-      height: 100%;
-      background: white;
-      box-shadow: -2px 0 5px rgba(0,0,0,0.3);
-      overflow-y: auto;
-      display: none;
-      padding: 16px;
-      z-index: 1000;
+      top: 0; right: 0; width: 320px; height: 100%;
+      background: white; box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+      overflow-y: auto; display: none; padding: 16px; z-index: 1000;
     }
     #sidebar h2 { margin-top: 0; }
     .violation-item { margin-bottom: 16px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
     .violation-item img { width: 100%; margin-top: 8px; }
     .view-all-btn {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 4px 8px;
-      background: #4287f5;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      cursor: pointer;
+      display: inline-block; margin-top: 8px;
+      padding: 4px 8px; background: #4287f5; color: white;
+      text-decoration: none; border-radius: 4px; cursor: pointer;
     }
     #reset-btn {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1001;
-      padding: 10px;
-      background: #4287f5;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: absolute; bottom: 20px; right: 20px; z-index: 1001;
+      padding: 10px; background: #4287f5; color: white; border: none;
+      border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      font-size: 18px; display: flex; align-items: center; justify-content: center;
     }
     #reset-btn:hover { background: #2f6fe0; }
   </style>
@@ -63,53 +40,56 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // 地圖初始化
+    // 1. 初始化地圖
     const map = L.map('map').setView([24.1792, 120.6009], 17);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-
-    map.on('click', () => {
-      document.getElementById('sidebar').style.display = 'none';
-    });
+    map.on('click', () => document.getElementById('sidebar').style.display = 'none');
     document.getElementById('reset-btn').addEventListener('click', () => {
       map.setView([24.1792, 120.6009], 17);
     });
 
-    // 攝影機座標
+    // 2. 攝影機座標
     const cameras = [
-      { name: 'test_road', lat: 24.1795, lng: 120.6010 },
-      { name: 'yuenonglixin1', lat: 24.1800, lng: 120.6015 },
-      { name: '測試用勿按', lat: 24.1797, lng: 120.6042 },
-      { name: '約農力行路口', lat: 24.1793, lng: 120.6030 }
+      { name: 'test_road',        lat: 24.1795, lng: 120.6010 },
+      { name: 'yuenonglixin1',    lat: 24.1800, lng: 120.6015 },
+      { name: '測試用勿按',       lat: 24.1797, lng: 120.6042 },
+      { name: '約農力行路口',     lat: 24.1793, lng: 120.6030 }
     ];
 
-    // 全域變數：存放最新 violations
-    let violations = [];
+    // 3. 全域變數：存放 violations 物件與最後更新時間
+    let violations = {};
     let lastTimestamp = "";
 
-    // 讀取並更新 JSON
+    // 4. 讀取並更新 violations
     function loadViolationData() {
       fetch("https://yijean333.github.io/flask_backend/violations.json")
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
         .then(data => {
-          violations = data;
-          // 篩出今天的資料
+          violations = data;  // data 是一個 { cameraName: [ ... ], ... } 物件
+          // 篩今天資料並更新 lastTimestamp
           const today = new Date().toISOString().split("T")[0];
-          const todayData = violations.filter(item => item.time.startsWith(today));
-          // 找最新一筆 time
-          const newest = todayData.reduce((max, i) => i.time > max ? i.time : max, "");
+          let newest = "";
+          Object.values(violations).forEach(arr => {
+            arr.forEach(item => {
+              if (item.time.startsWith(today) && item.time > newest) {
+                newest = item.time;
+              }
+            });
+          });
           if (newest && newest !== lastTimestamp) {
             lastTimestamp = newest;
-            console.log("資料更新到：" + lastTimestamp);
+            console.log("資料更新至：" + lastTimestamp);
           }
         })
         .catch(err => console.error("載入 JSON 發生錯誤:", err));
     }
-
-    // 一開始載入並每分鐘更新一次
     loadViolationData();
     setInterval(loadViolationData, 60 * 1000);
 
-    // 為每個攝影機加上標記與點擊行為
+    // 5. 為每個攝影機新增 marker 與點擊事件
     cameras.forEach(cam => {
       const marker = L.marker([cam.lat, cam.lng]).addTo(map);
       marker.bindPopup(`<b>${cam.name}</b><br>載入中...`);
@@ -119,16 +99,21 @@
         popup.setContent(`<b>${cam.name}</b><br>載入中...`);
         popup.openOn(map);
 
-        // 篩出該鏡頭且為今天的違規
+        // 如果資料尚未讀到
+        if (Object.keys(violations).length === 0) {
+          popup.setContent(`<b>${cam.name}</b><br>資料尚未載入`);
+          return;
+        }
+
+        const allData = violations[cam.name] || [];
         const today = new Date().toISOString().split("T")[0];
-        const data = violations
-          .filter(item => item.camera_name === cam.name && item.time.startsWith(today));
+        const todayData = allData.filter(item => item.time.startsWith(today));
 
         let content;
-        if (data.length === 0) {
+        if (todayData.length === 0) {
           content = `<b>${cam.name}</b><br>最近沒有違規紀錄`;
         } else {
-          const latest = data[data.length - 1];
+          const latest = todayData[todayData.length - 1];
           content = `
             <b>${cam.name}</b><br>
             最後違規時間：${latest.time}<br>
@@ -140,14 +125,15 @@
       });
     });
 
-    // 顯示側欄並載入完整資料
+    // 6. 側欄顯示完整資料
     window.showSidebar = function(cameraName) {
       const sb = document.getElementById('sidebar');
       sb.innerHTML = `<h2>${cameraName} 違規紀錄</h2>`;
 
+      const allData = violations[cameraName] || [];
       const today = new Date().toISOString().split("T")[0];
-      const data = violations
-        .filter(item => item.camera_name === cameraName && item.time.startsWith(today))
+      const data = allData
+        .filter(item => item.time.startsWith(today))
         .sort((a, b) => b.time.localeCompare(a.time));
 
       if (data.length === 0) {
