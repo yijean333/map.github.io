@@ -41,7 +41,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     // 1. 初始化地圖
-    const map = L.map('map').setView([24.1792, 120.6009], 17);
+    const map = L.map('map').setView([24.1803, 120.6044], 17);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
     map.on('click', () => document.getElementById('sidebar').style.display = 'none');
     document.getElementById('reset-btn').addEventListener('click', () => {
