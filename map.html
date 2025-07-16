@@ -163,14 +163,14 @@
     // 6. 側欄顯示完整資料
     window.showSidebar = function(cameraName) {
       const sb = document.getElementById('sidebar');
-      //sb.innerHTML = `<h2>${cameraName} 違規紀錄</h2>`;
-      sb.innerHTML = `
-        <h2>${cameraName} 違規紀錄</h2>
-        <div style="margin-bottom: 10px; font-size: 14px;">
-          查詢完整歷史紀錄請至 
-          <a href="https://discord.gg/你的連結" target="_blank">Discord 群組</a>
-        </div>
-      `;
+      sb.innerHTML = `<h2>${cameraName} 違規紀錄</h2>`;
+      //sb.innerHTML = `
+        //<h2>${cameraName} 違規紀錄</h2>
+        //<div style="margin-bottom: 10px; font-size: 14px;">
+          //查詢完整歷史紀錄請至 
+          //<a href="https://discord.gg/你的連結" target="_blank">Discord 群組</a>
+        //</div>
+      //`;
 
       const allData = violations[cameraName] || [];
       const today = new Date().toISOString().split("T")[0];
