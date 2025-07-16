@@ -100,7 +100,7 @@
     // 5. 為每個攝影機新增 marker 與點擊事件
     cameras.forEach(cam => {
       //const marker = L.marker([cam.lat, cam.lng]).addTo(map);
-      const marker = cam.name === '測試用勿按'// 記得刪!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      const marker = cam.name === '測試牛牛'
         ? L.marker([cam.lat, cam.lng], { icon: cowIcon })
         : L.marker([cam.lat, cam.lng]);  // 不傳 icon 就會用預設雨滴
       marker.addTo(map);
