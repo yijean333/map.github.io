@@ -62,7 +62,7 @@
 
     // 4. 讀取並更新 violations
     function loadViolationData() {
-      fetch("https://yijean333.github.io/flask_backend/violations.json")
+      fetch("https://yijean333.github.io/backend/violations.json")
         .then(res => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return res.json();
