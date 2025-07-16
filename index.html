@@ -52,7 +52,9 @@
     const cameras = [
       { name: '一校大門出入口',   lat: 24.1824, lng: 120.6025 },
       { name: '力行路運建學程',   lat: 24.1795, lng: 120.6048 },
-      { name: '測試用勿按',       lat: 24.1800, lng: 120.6015 },
+      { name: '測試牛1',       lat: 24.1800, lng: 120.6014 },
+      { name: '測試牛2',       lat: 24.1800, lng: 120.6015 },
+      { name: '測試牛3',       lat: 24.1800, lng: 120.6016 },
       { name: '約農力行路口',     lat: 24.1803, lng: 120.6013 }
     ];
 
@@ -100,9 +102,10 @@
     // 5. 為每個攝影機新增 marker 與點擊事件
     cameras.forEach(cam => {
       //const marker = L.marker([cam.lat, cam.lng]).addTo(map);
-      const marker = cam.name === '測試牛牛'
+      const cowNames = ['測試牛1', '測試牛2', '測試牛3'];
+      const marker = cowNames.includes(cam.name)
         ? L.marker([cam.lat, cam.lng], { icon: cowIcon })
-        : L.marker([cam.lat, cam.lng]);  // 不傳 icon 就會用預設雨滴
+        : L.marker([cam.lat, cam.lng]);
       marker.addTo(map);
       
       marker.bindPopup(`<b>${cam.name}</b><br>載入中...`);
