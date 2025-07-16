@@ -15,4 +15,4 @@
 
 - 地圖上僅顯示**當日**的違規紀錄
 - 若要查詢**今日以前的歷史紀錄**，請至 Discord 使用查詢功能：
-  [點我加入 Discord 群組](https://discord.gg/73VpURF9cY)
+  [點我加入 Discord 群組](https://discord.gg/Sxb7GxagfY)
