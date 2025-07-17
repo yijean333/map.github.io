@@ -77,7 +77,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // 1. 初始化地圖
+    // 初始化地圖
     const map = L.map('map').setView([24.1811, 120.6029], 18);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, minZoom: 16}).addTo(map);
     map.on('click', () => document.getElementById('sidebar').style.display = 'none');
@@ -85,7 +85,7 @@
       map.setView([24.1811, 120.6029], 18);
     });
 
-    // 2. 攝影機座標
+    // 監視器名稱與座標
     const cameras = [
       { name: '一校大門出入口',   lat: 24.1824, lng: 120.6025 },
       { name: '力行路運建學程',   lat: 24.1795, lng: 120.6048 },
@@ -95,11 +95,11 @@
       { name: '約農力行路口',     lat: 24.1803, lng: 120.6013 }
     ];
 
-    // 3. 全域變數：存放 violations 物件與最後更新時間
+    // 全域變數：用來記錄違規資料與最後更新時間
     let violations = {};
     let lastTimestamp = "";
 
-    // 4. 讀取並更新 violations
+    // 讀取違規資料，並同步更新最後時間戳記
     function loadViolationData() {
       fetch("https://yijean333.github.io/backend/violations.json")
         .then(res => {
@@ -107,7 +107,7 @@
           return res.json();
         })
         .then(data => {
-          violations = data;  // data 是一個 { cameraName: [ ... ], ... } 物件
+          violations = data;  // data 是以攝影機名稱為鍵、違規資料陣列為值的物件
           // 篩今天資料並更新 lastTimestamp
           const today = new Date().toISOString().split("T")[0];
           let newest = "";
@@ -128,17 +128,16 @@
     loadViolationData();
     setInterval(loadViolationData, 60 * 1000);
     
-    // 自訂「三隻牛」圖示
+    // 自訂測試圖示
     const cowIcon = L.icon({
       iconUrl: 'cow.jpg',
-      iconSize: [35, 35],       // 根據圖檔比例調整大小
-      iconAnchor: [17, 34],     // 圖標底部中心
-      popupAnchor: [0, -30],    // popup 位置
+      iconSize: [35, 35],       
+      iconAnchor: [17, 34],    
+      popupAnchor: [0, -30],    
     });
     
-    // 5. 為每個攝影機新增 marker 與點擊事件
+    // 為每支監視器建立地圖標記與點擊事件
     cameras.forEach(cam => {
-      //const marker = L.marker([cam.lat, cam.lng]).addTo(map);
       const cowNames = ['測試牛1', '測試牛2', '測試牛3'];
       const marker = cowNames.includes(cam.name)
         ? L.marker([cam.lat, cam.lng], { icon: cowIcon })
@@ -152,7 +151,7 @@
         popup.setContent(`<b>${cam.name}</b><br>載入中...`);
         popup.openOn(map);
 
-        // 如果資料尚未讀到
+        // 若資料尚未載入
         if (Object.keys(violations).length === 0) {
           popup.setContent(`<b>${cam.name}</b><br>資料尚未載入`);
           return;
@@ -164,7 +163,7 @@
 
         let content;
         if (todayData.length === 0) {
-          content = `<b>${cam.name}</b><br>最近沒有違規紀錄`;
+          content = `<b>${cam.name}</b><br>今天尚未發現違規事件`;
         } else {
           const latest = todayData[todayData.length - 1];
           content = `
@@ -178,10 +177,10 @@
       });
     });
 
-    // 6. 側欄顯示完整資料
+    // 顯示側欄，列出今日違規紀錄
     window.showSidebar = function(cameraName) {
       const sb = document.getElementById('sidebar');
-      sb.innerHTML = `<h2>${cameraName} 違規紀錄</h2>`;
+      sb.innerHTML = `<h2>${cameraName} 今天的違規紀錄</h2>`;
 
       const allData = violations[cameraName] || [];
       const today = new Date().toISOString().split("T")[0];
@@ -190,7 +189,7 @@
         .sort((a, b) => b.time.localeCompare(a.time));
 
       if (data.length === 0) {
-        sb.innerHTML += `<p>今天沒有任何記錄。</p>`;
+        sb.innerHTML += `<p>今天尚未發現違規事件</p>`;
       } else {
         data.forEach(item => {
           const div = document.createElement('div');
