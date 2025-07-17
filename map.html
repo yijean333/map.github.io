@@ -180,7 +180,7 @@
     // 顯示側欄，列出今日違規紀錄
     window.showSidebar = function(cameraName) {
       const sb = document.getElementById('sidebar');
-      sb.innerHTML = `<h2>${cameraName} 今天的違規紀錄</h2>`;
+      sb.innerHTML = `<h2>${cameraName} 違規紀錄</h2>`;
 
       const allData = violations[cameraName] || [];
       const today = new Date().toISOString().split("T")[0];
