@@ -79,12 +79,12 @@
   <script>
     // 初始化地圖
     // const map = L.map('map').setView([24.1811, 120.6029], 18);
-    const map = L.map('map').setView([22.6183, 120.2846], 18);
+    const map = L.map('map').setView([22.6195, 120.2818], 18);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, minZoom: 16}).addTo(map);
     map.on('click', () => document.getElementById('sidebar').style.display = 'none');
     document.getElementById('reset-btn').addEventListener('click', () => {
       // map.setView([24.1811, 120.6029], 18);
-      map.setView([22.6183, 120.2846], 18);
+      map.setView([22.6195, 120.2818], 18);
     });
 
     // 監視器名稱與座標
@@ -95,7 +95,8 @@
       { name: '測試牛2',       lat: 24.1800, lng: 120.6015 },
       { name: '測試牛3',       lat: 24.1800, lng: 120.6017 },
       { name: '約農力行路口',     lat: 24.1803, lng: 120.6013 },
-      { name: '測試路段1',        lat: 22.6183, lng: 120.2846}
+      { name: '測試路段1',        lat: 22.6183, lng: 120.2846},
+      { name: '測試路段2',        lat: 22.6208, lng: 120.2791}
     ];
 
     // 全域變數：用來記錄違規資料與最後更新時間
@@ -215,5 +216,6 @@
 
 </body>
 </html>
+
 
 
