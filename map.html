@@ -83,7 +83,8 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, minZoom: 16}).addTo(map);
     map.on('click', () => document.getElementById('sidebar').style.display = 'none');
     document.getElementById('reset-btn').addEventListener('click', () => {
-      map.setView([24.1811, 120.6029], 18);
+      // map.setView([24.1811, 120.6029], 18);
+      map.setView([22.6183, 120.2846], 18);
     });
 
     // 監視器名稱與座標
@@ -214,4 +215,5 @@
 
 </body>
 </html>
+
 
