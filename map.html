@@ -78,7 +78,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     // 初始化地圖
-    const map = L.map('map').setView([24.1811, 120.6029], 18);
+    // const map = L.map('map').setView([24.1811, 120.6029], 18);
+    const map = L.map('map').setView([22.6183, 120.2846], 18);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, minZoom: 16}).addTo(map);
     map.on('click', () => document.getElementById('sidebar').style.display = 'none');
     document.getElementById('reset-btn').addEventListener('click', () => {
@@ -92,7 +93,8 @@
       { name: '測試牛1',       lat: 24.1800, lng: 120.6013 },
       { name: '測試牛2',       lat: 24.1800, lng: 120.6015 },
       { name: '測試牛3',       lat: 24.1800, lng: 120.6017 },
-      { name: '約農力行路口',     lat: 24.1803, lng: 120.6013 }
+      { name: '約農力行路口',     lat: 24.1803, lng: 120.6013 },
+      { name: '測試路段1',        lat: 22.6183, lng: 120.2846}
     ];
 
     // 全域變數：用來記錄違規資料與最後更新時間
@@ -206,9 +208,10 @@
     };
   </script>
 
-<a href="https://discord.gg/Sxb7GxagfY" target="_blank" id="discord-button" title="點我加入 Discord 查詢所有歷史紀錄">
+<a href="https://discord.gg/Sxb7GxagfY" target="_blank" id="discord-button" title="點我加入 Discord 探索更多功能">
   <i class="fa-brands fa-discord"></i>
 </a>
 
 </body>
 </html>
+
